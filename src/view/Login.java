@@ -70,7 +70,6 @@ public class Login extends JFrame {
 	 */
 
 	public Login() {
-		setTitle("Login");
 		setResizable(false);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Login.class.getResource("/img/car.png")));
 		addWindowListener(new WindowAdapter() {
