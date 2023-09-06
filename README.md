@@ -1,4 +1,5 @@
-![GitHub](https://img.shields.io/github/license/casagrande04/CarSaoOS?color=purple)
+[![GitHub](https://img.shields.io/github/license/casagrande04/CarSaoOS?color=purple)](https://img.shields.io/github/license/casagrande04/CarSaoOS
+)
 
 # CarSão
 
