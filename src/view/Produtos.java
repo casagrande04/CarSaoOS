@@ -20,8 +20,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import javax.imageio.ImageIO;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -36,6 +34,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
@@ -43,24 +42,24 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.MaskFormatter;
 import javax.swing.text.PlainDocument;
 
 import com.toedter.calendar.JDateChooser;
 
 import model.DAO;
+import javax.swing.JCheckBox;
 
 public class Produtos extends JDialog {
 
-	// Instanciar objetos JDBC
 	DAO dao = new DAO();
 	private Connection con;
 	private PreparedStatement pst;
 	private ResultSet rs;
 
-	// Instancioar objetos para fluxo de bytes
+
 	private FileInputStream fis;
 
-	// Variável global para armazenar o tamanho da imagem(bytes)
 	private int tamanho;
 	/**
 	 * 
@@ -77,27 +76,26 @@ public class Produtos extends JDialog {
 	private JButton btnLimpar;
 	private JLabel lblFoto;
 	private JButton btnCarregar;
+	@SuppressWarnings("rawtypes")
 	private JComboBox cboUNID;
 	private JLabel txt;
 	private JScrollPane scrollPane;
+	@SuppressWarnings("rawtypes")
 	private JList listaFornecedor;
 	private JTextField txtFornecedor;
 	private JTextField txtIDFornecedor;
-	private JButton btnBuscar;
-	private JTextField txtDescricao;
-	private JLabel lblProduto;
+	private JButton btnBuscarID;
 	private JTextField txtProduto;
-	private JTextField txtFabricante;
 	private JTextField txtLote;
-	private JLabel lblDataDeValidade;
+	private JTextField txtFabricante;
 	private JTextField txtCusto;
-	private JTextField txtLucro;
 	private JLabel lblCusto;
 	private JLabel lblLucro;
+	private JTextField txtLucro;
 	private JDateChooser dateEnt;
+	private JTextArea txtDescricao;
 	private JDateChooser dateVal;
-	private JButton btnBuscar_1;
-	private JButton btnBuscar_2;
+	private JCheckBox chckFoto;
 
 	/**
 	 * Launch the application.
@@ -119,22 +117,24 @@ public class Produtos extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Produtos() {
+		getContentPane().setLocation(-322, -13);
 		getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-		setIconImage(Toolkit.getDefaultToolkit().getImage(Produtos.class.getResource("/img/note.png")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Produtos.class.getResource("/img/car.png")));
 		setTitle("Produtos\r\n");
-		setBounds(100, 100, 845, 661);
+		setBounds(350, 150, 800, 600);
 		getContentPane().setLayout(null);
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Fornecedores", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(317, 41, 206, 82);
+		panel.setBounds(296, 13, 206, 82);
 		getContentPane().add(panel);
 		panel.setLayout(null);
 
 		scrollPane = new JScrollPane();
 		scrollPane.setVisible(false);
-		scrollPane.setBounds(11, 38, 185, 54);
+		scrollPane.setBounds(10, 38, 185, 54);
 		panel.add(scrollPane);
 		scrollPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 
@@ -151,7 +151,7 @@ public class Produtos extends JDialog {
 		listaFornecedor.setBorder(null);
 
 		txtFornecedor = new JTextField();
-		txtFornecedor.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
+		txtFornecedor.setBorder(new LineBorder(new Color(171, 173, 179), 3, true));
 		txtFornecedor.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -162,7 +162,7 @@ public class Produtos extends JDialog {
 		panel.add(txtFornecedor);
 		txtFornecedor.setColumns(10);
 
-		JLabel lblNewLabel_2 = new JLabel("ID do Fornecedor*");
+		JLabel lblNewLabel_2 = new JLabel("ID do Fornecedor");
 		lblNewLabel_2.setBounds(10, 52, 104, 14);
 		panel.add(lblNewLabel_2);
 
@@ -173,21 +173,29 @@ public class Produtos extends JDialog {
 		txtIDFornecedor.setColumns(10);
 
 		txtID = new JTextField();
+		txtID.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode()== KeyEvent.VK_ENTER) {
+					buscarBarCode();
+				}
+			}
+		});
 		txtID.setEnabled(false);
 		txtID.setEditable(false);
 		txtID.setColumns(10);
-		txtID.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
-		txtID.setBounds(158, 85, 86, 20);
+		txtID.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtID.setBounds(137, 57, 86, 20);
 		getContentPane().add(txtID);
 
-		JLabel lblNewLabel = new JLabel("ID");
-		lblNewLabel.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblNewLabel.setBounds(46, 87, 46, 14);
+		JLabel lblNewLabel = new JLabel("Código");
+		lblNewLabel.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblNewLabel.setBounds(25, 59, 67, 14);
 		getContentPane().add(lblNewLabel);
 
 		JLabel lblBarcode = new JLabel("BarCode");
-		lblBarcode.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblBarcode.setBounds(46, 138, 67, 14);
+		lblBarcode.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblBarcode.setBounds(25, 120, 67, 14);
 		getContentPane().add(lblBarcode);
 
 		txtBarCode = new JTextField();
@@ -200,17 +208,22 @@ public class Produtos extends JDialog {
 			@Override
 			public void keyTyped(KeyEvent e) {
 			}
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					buscarBarCode();
+				}
+			}
 		});
 		txtBarCode.setColumns(10);
-		txtBarCode.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
-		txtBarCode.setBounds(158, 136, 309, 20);
+		txtBarCode.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtBarCode.setBounds(137, 117, 309, 20);
 		getContentPane().add(txtBarCode);
-		// Uso do Validador para limitar o número de caracteres
 		txtBarCode.setDocument(new Validador(20));
 
-		JLabel lblEstoque = new JLabel("Estoque*");
-		lblEstoque.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblEstoque.setBounds(46, 357, 86, 14);
+		JLabel lblEstoque = new JLabel("Estoque");
+		lblEstoque.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblEstoque.setBounds(25, 430, 86, 14);
 		getContentPane().add(lblEstoque);
 
 		txtEstoque = new JTextField();
@@ -224,13 +237,13 @@ public class Produtos extends JDialog {
 			}
 		});
 		txtEstoque.setColumns(10);
-		txtEstoque.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
-		txtEstoque.setBounds(158, 355, 309, 20);
+		txtEstoque.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtEstoque.setBounds(137, 428, 309, 20);
 		getContentPane().add(txtEstoque);
 
-		JLabel lblEstoqueMin = new JLabel("Estoque Min. *");
-		lblEstoqueMin.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblEstoqueMin.setBounds(46, 399, 107, 14);
+		JLabel lblEstoqueMin = new JLabel("Estoque Min.");
+		lblEstoqueMin.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblEstoqueMin.setBounds(25, 472, 86, 14);
 		getContentPane().add(lblEstoqueMin);
 
 		txtEstoqueMin = new JTextField();
@@ -244,51 +257,51 @@ public class Produtos extends JDialog {
 			}
 		});
 		txtEstoqueMin.setColumns(10);
-		txtEstoqueMin.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
-		txtEstoqueMin.setBounds(158, 397, 309, 20);
+		txtEstoqueMin.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtEstoqueMin.setBounds(137, 470, 309, 20);
 		getContentPane().add(txtEstoqueMin);
 
-		btnCarregar = new JButton("Carregar imagem");
+		btnCarregar = new JButton("CARREGAR IMAGEM");
+		btnCarregar.setEnabled(false);
 		btnCarregar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnCarregar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				carregarFoto();
 			}
 		});
-		btnCarregar.setBounds(602, 273, 139, 23);
+		btnCarregar.setBounds(581, 382, 173, 23);
 		getContentPane().add(btnCarregar);
 
-		JLabel lblUnid = new JLabel("UNID. *\r\n");
-		lblUnid.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblUnid.setBounds(361, 480, 61, 14);
+		JLabel lblUnid = new JLabel("UNID.");
+		lblUnid.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblUnid.setBounds(355, 514, 61, 14);
 		getContentPane().add(lblUnid);
 
 		cboUNID = new JComboBox();
-		cboUNID.setModel(
-				new DefaultComboBoxModel(new String[] { "", "UN", "CX", "PC", "KG", "g", "M", "cm", "L", "mL" }));
+		cboUNID.setModel(new DefaultComboBoxModel(new String[] { "UN", "CX", "PC", "KG", "M" }));
 		cboUNID.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		cboUNID.setBounds(421, 476, 46, 22);
+		cboUNID.setBounds(400, 510, 46, 22);
 		getContentPane().add(cboUNID);
 
 		JLabel lblLocalDeArmazem = new JLabel("Local ");
-		lblLocalDeArmazem.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblLocalDeArmazem.setBounds(46, 422, 52, 14);
+		lblLocalDeArmazem.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblLocalDeArmazem.setBounds(25, 500, 52, 14);
 		getContentPane().add(lblLocalDeArmazem);
 
 		txtLocalArmazenamento = new JTextField();
 		txtLocalArmazenamento.setColumns(10);
-		txtLocalArmazenamento.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
-		txtLocalArmazenamento.setBounds(159, 433, 308, 20);
+		txtLocalArmazenamento.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtLocalArmazenamento.setBounds(138, 511, 207, 20);
 		getContentPane().add(txtLocalArmazenamento);
-		// Uso do Validador para limitar o número de caracteres
 		txtLocalArmazenamento.setDocument(new Validador(50));
 
 		JLabel lblArmazenamento = new JLabel("Armazenamento");
-		lblArmazenamento.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblArmazenamento.setBounds(46, 436, 121, 21);
+		lblArmazenamento.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblArmazenamento.setBounds(25, 514, 121, 21);
 		getContentPane().add(lblArmazenamento);
 
 		btnAdicionar = new JButton("");
+		btnAdicionar.setToolTipText("Adicionar");
 		btnAdicionar.setEnabled(false);
 		btnAdicionar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnAdicionar.addActionListener(new ActionListener() {
@@ -296,43 +309,50 @@ public class Produtos extends JDialog {
 				adicionar();
 			}
 		});
-		btnAdicionar.setIcon(new ImageIcon(Produtos.class.getResource("/img/adicionar.png")));
+		btnAdicionar.setIcon(new ImageIcon(Produtos.class.getResource("/img/add.png")));
 		btnAdicionar.setContentAreaFilled(false);
 		btnAdicionar.setBorder(null);
-		btnAdicionar.setBounds(204, 531, 60, 60);
+		btnAdicionar.setBounds(503, 485, 60, 60);
 		getContentPane().add(btnAdicionar);
 
 		btnEditar = new JButton("");
-		btnEditar.setEnabled(false);
+		btnEditar.setToolTipText("Editar");
 		btnEditar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnEditar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				editarProdutos();
+				if (chckFoto.isSelected()) {
+					editarProdutoComFoto();
+				} else {
+					editarProdutos();
+				}
+
+				
 			}
 		});
 		btnEditar.setIcon(new ImageIcon(Produtos.class.getResource("/img/editar.png")));
 		btnEditar.setContentAreaFilled(false);
 		btnEditar.setBorder(null);
-		btnEditar.setBounds(316, 531, 60, 60);
+		btnEditar.setBounds(568, 485, 60, 60);
 		getContentPane().add(btnEditar);
 
 		btnExcluir = new JButton("");
+		btnExcluir.setToolTipText("Excluir");
 		btnExcluir.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnExcluir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				excluirProdutos();
 			}
 		});
-		btnExcluir.setIcon(new ImageIcon(Produtos.class.getResource("/img/excluir.png")));
+		btnExcluir.setIcon(new ImageIcon(Produtos.class.getResource("/img/deletar.png")));
 		btnExcluir.setEnabled(false);
 		btnExcluir.setContentAreaFilled(false);
 		btnExcluir.setBorder(null);
-		btnExcluir.setBounds(433, 531, 60, 60);
+		btnExcluir.setBounds(637, 485, 60, 60);
 		getContentPane().add(btnExcluir);
 
 		btnLimpar = new JButton("");
 		btnLimpar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		btnLimpar.setIcon(new ImageIcon(Produtos.class.getResource("/img/Borracha.png")));
+		btnLimpar.setIcon(new ImageIcon(Produtos.class.getResource("/img/eraserG.png")));
 		btnLimpar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				limparCampos();
@@ -341,143 +361,184 @@ public class Produtos extends JDialog {
 		btnLimpar.setToolTipText("Limpar Campos");
 		btnLimpar.setContentAreaFilled(false);
 		btnLimpar.setBorder(null);
-		btnLimpar.setBounds(547, 531, 60, 60);
+		btnLimpar.setBounds(690, 485, 60, 60);
 		getContentPane().add(btnLimpar);
 
 		lblFoto = new JLabel("");
 		lblFoto.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
-		lblFoto.setIcon(new ImageIcon(Produtos.class.getResource("/img/addimage.png")));
-		lblFoto.setBounds(533, 13, 256, 256);
+		lblFoto.setIcon(new ImageIcon(Produtos.class.getResource("/img/image.png")));
+		lblFoto.setBounds(517, 115, 256, 256);
 		getContentPane().add(lblFoto);
 
-		txt = new JLabel("Descrição*");
-		txt.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		txt.setBounds(46, 210, 86, 20);
+		txt = new JLabel("Descrição");
+		txt.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		txt.setBounds(24, 221, 86, 20);
 		getContentPane().add(txt);
 
-		btnBuscar = new JButton("");
-		btnBuscar.addActionListener(new ActionListener() {
+		btnBuscarID = new JButton("");
+		btnBuscarID.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				buscar();
+				buscarID();
 			}
 		});
-		btnBuscar.setBorder(null);
-		btnBuscar.setContentAreaFilled(false);
-		btnBuscar.setIcon(new ImageIcon(Produtos.class.getResource("/img/Pesquisar.png")));
-		btnBuscar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		btnBuscar.setBounds(254, 77, 32, 32);
-		getContentPane().add(btnBuscar);
-
-		txtDescricao = new JTextField();
-		txtDescricao.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
-		txtDescricao.setBounds(158, 210, 309, 59);
-		getContentPane().add(txtDescricao);
-		txtDescricao.setColumns(10);
-
-		lblProduto = new JLabel("Produto*");
-		lblProduto.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblProduto.setBounds(46, 173, 67, 14);
-		getContentPane().add(lblProduto);
+		btnBuscarID.setBorder(null);
+		btnBuscarID.setContentAreaFilled(false);
+		btnBuscarID.setIcon(new ImageIcon(Produtos.class.getResource("/img/pesquisar.png")));
+		btnBuscarID.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnBuscarID.setBounds(233, 49, 32, 32);
+		getContentPane().add(btnBuscarID);
 
 		txtProduto = new JTextField();
+		txtProduto.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					buscarNomeProduto();
+				}
+			}
+			@Override
+			public void keyReleased(KeyEvent e) {
+				listarFornecedor();
+			}
+		});
 		txtProduto.setColumns(10);
-		txtProduto.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
-		txtProduto.setBounds(158, 171, 309, 20);
+		txtProduto.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtProduto.setBounds(137, 153, 309, 20);
 		getContentPane().add(txtProduto);
 
-		JLabel lblFabricante = new JLabel("Fabricante");
-		lblFabricante.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblFabricante.setBounds(46, 283, 86, 20);
-		getContentPane().add(lblFabricante);
-
-		txtFabricante = new JTextField();
-		txtFabricante.setColumns(10);
-		txtFabricante.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
-		txtFabricante.setBounds(158, 281, 309, 20);
-		getContentPane().add(txtFabricante);
-
-		JLabel lblLote = new JLabel("Lote*");
-		lblLote.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblLote.setBounds(46, 317, 86, 20);
-		getContentPane().add(lblLote);
+		JLabel lblProduto = new JLabel("Produto");
+		lblProduto.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblProduto.setBounds(25, 156, 67, 14);
+		getContentPane().add(lblProduto);
 
 		txtLote = new JTextField();
 		txtLote.setColumns(10);
-		txtLote.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
-		txtLote.setBounds(158, 319, 309, 20);
+		txtLote.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtLote.setBounds(137, 187, 309, 20);
 		getContentPane().add(txtLote);
 
-		JLabel lblDataDeEntrada = new JLabel("Data de Entrada");
-		lblDataDeEntrada.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblDataDeEntrada.setBounds(570, 309, 116, 20);
-		getContentPane().add(lblDataDeEntrada);
+		JLabel lblLote = new JLabel("Lote");
+		lblLote.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblLote.setBounds(25, 190, 67, 14);
+		getContentPane().add(lblLote);
 
-		lblDataDeValidade = new JLabel("Data de Validade*");
-		lblDataDeValidade.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblDataDeValidade.setBounds(563, 356, 120, 20);
-		getContentPane().add(lblDataDeValidade);
+		txtFabricante = new JTextField();
+		txtFabricante.setColumns(10);
+		txtFabricante.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtFabricante.setBounds(137, 296, 309, 20);
+		getContentPane().add(txtFabricante);
+
+		JLabel lblFabricante = new JLabel("Fabricante");
+		lblFabricante.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblFabricante.setBounds(25, 299, 86, 14);
+		getContentPane().add(lblFabricante);
+
+		JLabel lblDataEnt = new JLabel("Data Ent");
+		lblDataEnt.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblDataEnt.setBounds(25, 343, 86, 14);
+		getContentPane().add(lblDataEnt);
+		@SuppressWarnings("unused")
+		MaskFormatter msf = null;
+		try {
+			msf = new MaskFormatter("####-##-##");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		JLabel lblDataEnt_1 = new JLabel("Data Val");
+		lblDataEnt_1.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblDataEnt_1.setBounds(25, 382, 86, 14);
+		getContentPane().add(lblDataEnt_1);
+		@SuppressWarnings("unused")
+		MaskFormatter msf2 = null;
+		try {
+			msf2 = new MaskFormatter("####-##-##");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		txtCusto = new JTextField();
+		txtCusto.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				String caracteres = "0123456789.";
+				if (!caracteres.contains(e.getKeyChar() + "")) {
+					e.consume();
+				}
+			}
+		});
 		txtCusto.setColumns(10);
-		txtCusto.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
-		txtCusto.setBounds(550, 418, 133, 20);
+		txtCusto.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtCusto.setBounds(340, 341, 106, 20);
 		getContentPane().add(txtCusto);
 
-		txtLucro = new JTextField();
-		txtLucro.setColumns(10);
-		txtLucro.setBorder(new LineBorder(new Color(128, 0, 0), 2, true));
-		txtLucro.setBounds(550, 464, 133, 20);
-		getContentPane().add(txtLucro);
-
-		lblCusto = new JLabel("Custo*");
-		lblCusto.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblCusto.setBounds(599, 399, 52, 20);
+		lblCusto = new JLabel("Custo");
+		lblCusto.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblCusto.setBounds(286, 343, 61, 14);
 		getContentPane().add(lblCusto);
 
 		lblLucro = new JLabel("Lucro");
-		lblLucro.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 13));
-		lblLucro.setBounds(599, 446, 52, 20);
+		lblLucro.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 12));
+		lblLucro.setBounds(286, 382, 61, 14);
 		getContentPane().add(lblLucro);
 
-		JPanel panel_1 = new JPanel();
-		panel_1.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
-		panel_1.setBounds(533, 302, 173, 196);
-		getContentPane().add(panel_1);
-		panel_1.setLayout(null);
+		txtLucro = new JTextField();
+		txtLucro.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
 
-		dateEnt = new JDateChooser();
-		dateEnt.setBounds(17, 28, 134, 20);
-		panel_1.add(dateEnt);
+					String caracteres = "0123456789.";
+					if (!caracteres.contains(e.getKeyChar() + "")) {
+						e.consume();
+					}
+				}
+			
+		});
+		txtLucro.setColumns(10);
+		txtLucro.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtLucro.setBounds(340, 380, 106, 20);
+		getContentPane().add(txtLucro);
+		
 
 		dateVal = new JDateChooser();
-		dateVal.setBounds(17, 76, 134, 20);
-		panel_1.add(dateVal);
+		dateVal.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		dateVal.setBounds(137, 382, 139, 20);
+		getContentPane().add(dateVal);
 
-		btnBuscar_1 = new JButton("");
-		btnBuscar_1.addActionListener(new ActionListener() {
+		dateEnt = new JDateChooser();
+		dateEnt.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		dateEnt.setBounds(137, 343, 139, 20);
+		getContentPane().add(dateEnt);
+
+		txtDescricao = new JTextArea();
+		txtDescricao.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtDescricao.setBounds(136, 220, 309, 59);
+		getContentPane().add(txtDescricao);
+		
+		chckFoto = new JCheckBox("Alterar Imagem ao editar");
+		chckFoto.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				buscarBarcode();
+				btnCarregar.setEnabled(true);
+				if (chckFoto.isSelected()) {
+					lblFoto.setIcon(null);
+					lblFoto.requestFocus();
+					lblFoto.setBackground(Color.yellow);
+					lblFoto.setIcon(new ImageIcon(Principal.class.getResource("/img/image.png")));
+				} else {
+					lblFoto.setBackground(Color.WHITE);
+					btnCarregar.setEnabled(false);
+				}
+				
+				
+			
 			}
 		});
-		btnBuscar_1.setIcon(new ImageIcon(Produtos.class.getResource("/img/Pesquisar.png")));
-		btnBuscar_1.setContentAreaFilled(false);
-		btnBuscar_1.setBorder(null);
-		btnBuscar_1.setBounds(477, 135, 32, 32);
-		getContentPane().add(btnBuscar_1);
+			
+		chckFoto.setBounds(581, 412, 184, 23);
+		getContentPane().add(chckFoto);
 
-		btnBuscar_2 = new JButton("");
-		btnBuscar_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				buscarProduto();
-			}
-		});
-		btnBuscar_2.setIcon(new ImageIcon(Produtos.class.getResource("/img/Pesquisar.png")));
-		btnBuscar_2.setContentAreaFilled(false);
-		btnBuscar_2.setBorder(null);
-		btnBuscar_2.setBounds(477, 170, 32, 32);
-		getContentPane().add(btnBuscar_2);
-
-	}// FIM DO CONSTRUTOR
+	}
 
 	private void carregarFoto() {
 		JFileChooser jfc = new JFileChooser();
@@ -504,133 +565,108 @@ public class Produtos extends JDialog {
 	 * Método responsável por limpar os campos
 	 */
 	private void limparCampos() {
-		txtFornecedor.setText(null);
+		dateEnt.setDate(null);
+		dateVal.setDate(null);
 		txtProduto.setText(null);
-		txtFabricante.setText(null);
 		txtLote.setText(null);
-		// datas entrada e saida
-		// datas entrada e saida
+		txtFabricante.setText(null);
 		txtCusto.setText(null);
 		txtLucro.setText(null);
+		txtFornecedor.setText(null);
 		txtID.setText(null);
 		txtBarCode.setText(null);
 		txtDescricao.setText(null);
 		lblFoto.setIcon(null);
 		txtEstoque.setText(null);
 		txtEstoqueMin.setText(null);
-
 		txtLocalArmazenamento.setText(null);
 		cboUNID.setSelectedItem(null);
 		btnAdicionar.setEnabled(false);
 		btnEditar.setEnabled(false);
 		btnExcluir.setEnabled(false);
-		btnBuscar.setEnabled(true);
-		lblFoto.setIcon(new ImageIcon(Principal.class.getResource("/img/file camera.png")));
+		btnBuscarID.setEnabled(true);
+		btnCarregar.setEnabled(false);
+		chckFoto.setSelected(false);
+		lblFoto.setIcon(new ImageIcon(Principal.class.getResource("/img/image.png")));
 
-	}// fim do método limparCampos()
+	}
 
 	/**
 	 * Método para adicionar um novo contato
 	 */
 	private void adicionar() {
-		// System.out.println("teste");
-		// Validação de campos obrigatórios
 		if (txtBarCode.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha o Barcode do produto");
 			txtBarCode.requestFocus();
-		} else if (txtFornecedor.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(null, "Preencha o fornecedor do produto");
-			txtFornecedor.requestFocus();
-		} else if (txtDescricao.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(null, "Preencha a descrição do produto");
-			txtDescricao.requestFocus();
 		} else if (txtProduto.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha o nome do produto");
 			txtProduto.requestFocus();
 		} else if (txtLote.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha o lote do produto");
 			txtLote.requestFocus();
-		} else if (txtFabricante.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(null, "Preencha o fabricante do produto");
-			txtFabricante.requestFocus();
-
-			// } else if (dateEnt.getText().isEmpty()) {
-			// JOptionPane.showMessageDialog(null, "Preencha a data de entrada do produto");
-			// dataEnt.requestFocus();
-			// } else if (dateVal.getText().isEmpty()) {
-			// JOptionPane.showMessageDialog(null, "Preencha a data de validade do
-			// produto");
-			// dataVal.requestFocus();
+		} else if (txtFornecedor.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "Preencha o fornecedor do produto");
+			txtFornecedor.requestFocus();
+		} else if (txtDescricao.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "Preencha a descrição do produto");
+			txtDescricao.requestFocus();
+		} else if (dateVal.getDate().toString().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "Preencha a data de validade do produto");
+			dateVal.requestFocus();
 		} else if (txtCusto.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha o custo do produto");
 			txtCusto.requestFocus();
-		} else if (txtLucro.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(null, "Preencha o lucro obtido em cima do produto");
-			txtLucro.requestFocus();
-
 		} else if (txtEstoque.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha o estoque do produto");
 			txtEstoque.requestFocus();
 		} else if (txtEstoqueMin.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha o estoque mínimo do produto");
 			txtEstoqueMin.requestFocus();
-
 		} else if (txtLocalArmazenamento.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha o local de armazenamento do produto");
 			txtLocalArmazenamento.requestFocus();
 		} else {
-
-			// Lógica Principal
-			// CRUD Create
-			String create = "insert into produtos(barcode,descricao,produto,lote,fabricante,dataent,dataval,custo,lucro,foto,estoque,estoquemin,unidademedida,localarmazenagem,idfornecedor) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-			// tratamento de exceções
+			String create = "insert into produtos(barcode,descricao,produto,lote,foto,fabricante,dataval,custo,lucro,estoque,estoquemin,unidademedida,localarmazenagem,idfornecedor) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			try {
-				// abrir a conexão
+	
 				con = dao.conectar();
-				// preparar a execução da query (instrução sql - CRUD Read)
 				pst = con.prepareStatement(create);
 				pst.setString(1, txtBarCode.getText());
 				pst.setString(2, txtDescricao.getText());
 				pst.setString(3, txtProduto.getText());
 				pst.setString(4, txtLote.getText());
-				pst.setString(5, txtFabricante.getText());
-				// pst.setString(6, dateEnt.getText());
-				// pst.setString(7, dateVal.getText());
+				pst.setBlob(5, fis, tamanho);
+				pst.setString(6, txtFabricante.getText());
+				
+				SimpleDateFormat formatador = new SimpleDateFormat("yyyyMMdd");
+				String dataFormatada = formatador.format(dateVal.getDate());
+				pst.setString(7, dataFormatada);
 				pst.setString(8, txtCusto.getText());
 				pst.setString(9, txtLucro.getText());
-				pst.setBlob(10, fis, tamanho);
-				pst.setString(11, txtEstoque.getText());
-				pst.setString(12, txtEstoqueMin.getText());
-
-				pst.setString(13, cboUNID.getSelectedItem().toString());
-				pst.setString(14, txtLocalArmazenamento.getText());
-				pst.setString(15, txtIDFornecedor.getText());
-				// executa a query(instrução sql (CRUD - Create))
-				// pst.executeUpdate();
+				pst.setString(10, txtEstoque.getText());
+				pst.setString(11, txtEstoqueMin.getText());
+				pst.setString(12, cboUNID.getSelectedItem().toString());
+				pst.setString(13, txtLocalArmazenamento.getText());
+				pst.setString(14, txtIDFornecedor.getText());
 				int confirma = pst.executeUpdate();
 				if (confirma == 1) {
 					JOptionPane.showMessageDialog(null, "Produto Adicionado");
 				} else {
 					JOptionPane.showMessageDialog(null, "Erro! Produto não adicionado.");
 				}
-
-				// limpar os campos
 				limparCampos();
-				// fechar a conexão
 				con.close();
 			} catch (Exception e) {
 				System.out.println(e);
 			}
 
 		}
-	}// fim do método adicionar
+	}
 
 	/**
 	 * Método para editar um contato (ATENÇÃO!!! Usar o ID)
 	 */
 	private void editarProdutos() {
-		// System.out.println("teste do botão editar");
-		// Validação dos campos obrigatórios
 		if (txtBarCode.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha o Barcode do produto");
 			txtBarCode.requestFocus();
@@ -640,63 +676,32 @@ public class Produtos extends JDialog {
 		} else if (txtDescricao.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha a descrição do produto");
 			txtDescricao.requestFocus();
-		} else if (txtProduto.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(null, "Preencha o nome do produto");
-			txtProduto.requestFocus();
-		} else if (txtLote.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(null, "Preencha o lote do produto");
-			txtLote.requestFocus();
-		} else if (txtFabricante.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(null, "Preencha o fabricante do produto");
-			txtFabricante.requestFocus();
-			// data de entrada
-			// data de validade
-		} else if (txtCusto.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(null, "Preencha o custo do produto");
-			txtCusto.requestFocus();
-		} else if (txtLucro.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(null, "Preencha o lucro obtido em cima do produto");
-			txtLucro.requestFocus();
-
 		} else if (txtEstoqueMin.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha o estoque mínimo do produto");
 			txtEstoqueMin.requestFocus();
-
 		} else if (txtLocalArmazenamento.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha o local de armazenamento do produto");
 			txtLocalArmazenamento.requestFocus();
 		} else {
-			// lógica principal
-			// CRUD - Update
-			String update = "update produtos set barcode=?,descricao=?,produto=?,lote=?,fabricante=?,dataent=?,dataval=?,custo=?,lucro=?,foto=?,estoque=?,estoquemin=?,unidademedida=?,localarmazenagem=?,idfornecedor=? where codigo=?";
-			// tratamento de exceções
+			String update = "update produtos set descricao=?,produto=?,lote=?,fabricante=?,custo=?,lucro=?,estoque=?,estoquemin=?,unidademedida=?,localarmazenagem=?,idfornecedor=? where codigo =?";
 			try {
-				// abrir a conexão
 				con = dao.conectar();
-				// preparar a query (instrução sql)
 				pst = con.prepareStatement(update);
-				pst.setString(1, txtBarCode.getText());
-				pst.setString(2, txtDescricao.getText());
-				pst.setString(3, txtProduto.getText());
-				pst.setString(4, txtLote.getText());
-				pst.setString(5, txtFabricante.getText());
-				// pst.setString(6, dateEnt.getText());
-				// pst.setString(7, dateVal.getText());
-				pst.setString(8, txtCusto.getText());
-				pst.setString(9, txtLucro.getText());
-				pst.setBlob(10, fis, tamanho);
-				pst.setString(11, txtEstoque.getText());
-				pst.setString(12, txtEstoqueMin.getText());
-				pst.setString(13, cboUNID.getSelectedItem().toString());
-				pst.setString(14, txtLocalArmazenamento.getText());
-				pst.setString(15, txtIDFornecedor.getText());
-				// executar a query
+				pst.setString(1, txtDescricao.getText());
+				pst.setString(2, txtProduto.getText());
+				pst.setString(3, txtLote.getText());
+				pst.setString(4, txtFabricante.getText());
+				pst.setString(5, txtCusto.getText());
+				pst.setString(6, txtLucro.getText());
+				pst.setString(7, txtEstoque.getText());
+				pst.setString(8, txtEstoqueMin.getText());
+				pst.setString(9, cboUNID.getSelectedItem().toString());
+				pst.setString(10, txtLocalArmazenamento.getText());
+				pst.setString(11, txtIDFornecedor.getText());
+				pst.setString(12, txtID.getText());
 				pst.executeUpdate();
-				// confirmar para o usuário
 				JOptionPane.showMessageDialog(null, "Dados do produto editado com sucesso.");
-				// Limpar os campos
 				limparCampos();
-				// Fechar a conexão
 				con.close();
 			} catch (Exception e) {
 				System.out.println(e);
@@ -704,34 +709,23 @@ public class Produtos extends JDialog {
 
 		}
 
-	}// fim do método editar contato
+	}
 
 	/**
 	 * Método usado para excluir um contato
 	 */
 	private void excluirProdutos() {
-		// System.out.println("Teste do botão excluir");
-		// validação de exclusão - a variável confirma captura a opção escolhida
 		int confirma = JOptionPane.showConfirmDialog(null, "Confirma a exclusão deste produto?", "Atenção!",
 				JOptionPane.YES_NO_OPTION);
 		if (confirma == JOptionPane.YES_OPTION) {
-			// CRUD - Delete
-			String delete = "delete from produtos where codigo=?";
-			// tratamento de exceções
+			String delete = "delete from produtos where codeproduto=?";
 			try {
-				// abrir conexão
 				con = dao.conectar();
-				// preparar a query (instrução sql)
 				pst = con.prepareStatement(delete);
-				// substituir a ? pelo id do contato
 				pst.setString(1, txtID.getText());
-				// executar a query
 				pst.executeUpdate();
-				// limpar campos
 				limparCampos();
-				// exibir uma mensagem ao usuário
 				JOptionPane.showMessageDialog(null, "Produto excluído");
-				// fechar a conexão
 				con.close();
 
 			} catch (java.sql.SQLIntegrityConstraintViolationException e1) {
@@ -741,64 +735,50 @@ public class Produtos extends JDialog {
 				System.out.println(e2);
 			}
 		}
-	} // fim do método excluir contato
-		// PlainDocument -> recursos para formatação
+	}
 
 	public class Validador extends PlainDocument {
-		// variável que irá armazenar o número máximo de caracteres permitidos
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private int limite;
-		// construtor personalizado -> será usado pela caixas de texto JTextFiled
 
 		public Validador(int limite) {
 			super();
 			this.limite = limite;
 		}
 
-		// Método interno para validar o limite de caracteres
-		// BadLocation -> Tratamento de exceções
+
 		public void insertString(int ofs, String str, AttributeSet a) throws BadLocationException {
-			// Se o limite não for ultrapassado permitir a digitação
+
 			if ((getLength() + str.length()) <= limite) {
 				super.insertString(ofs, str, a);
 			}
 		}
 
-	} // Fim do validador
+	}
 
 	/**
 	 * Método usado para listar o nome dos usuários na lista
 	 */
+	@SuppressWarnings("unchecked")
 	private void listarFornecedor() {
-		// System.out.println("teste");
-		// A linha abaixo cria um objeto usando como referência um vetor dinâmico, este
-		// objeto irá temporariamente armazenar os nomes
 		DefaultListModel<String> modelo = new DefaultListModel<>();
-		// Setar o modelo (vetor na lista)
 		listaFornecedor.setModel(modelo);
-		// Query (instrução sql)
 		String readListaFornecedor = "select * from fornecedores where razaosocial like '" + txtFornecedor.getText()
 				+ "%'" + "order by razaosocial";
 		try {
-			// Abrir a conexão
 			con = dao.conectar();
-			// Preparar a query (instrução sql)
 			pst = con.prepareStatement(readListaFornecedor);
-			// Executar a query e trazer o resultado para lista
 			rs = pst.executeQuery();
-			// Uso do while para trzer os usuários enquanto existir
 			while (rs.next()) {
-				// Mostrar a barra de rolagem (scrollpane)
 				scrollPane.setVisible(true);
-				// Mostrar a lista
-				// listaUsers.setVisible(true);
-				// Adicionar os usuários no vetor -> lista
 				modelo.addElement(rs.getString(2));
-				// Esconder a lista se nenhuma letra for digitada
 				if (txtFornecedor.getText().isEmpty()) {
 					scrollPane.setVisible(false);
 				}
 			}
-			// Fechar Conexão
 			con.close();
 		} catch (Exception e) {
 			System.out.println(e);
@@ -809,101 +789,63 @@ public class Produtos extends JDialog {
 	 * Método que busca o usuário selecionado na lista
 	 */
 	private void buscarFornecedorLista() {
-		// System.out.println("Teste");
-		// Variável que captura o índice da linha da lista
 		int linha = listaFornecedor.getSelectedIndex();
 		if (linha >= 0) {
-			// Query (instrução SQL)
-			// limit (0,1) -> seleciona o índice 0 do vetor e 1 usuário da lista
 			String readListaFornecedor = "select * from fornecedores where razaosocial like '" + txtFornecedor.getText()
 					+ "%'" + "order by razaosocial limit " + (linha) + " , 1";
 			try {
-				// abrir a conexão
 				con = dao.conectar();
-				// preparar a query para execução
 				pst = con.prepareStatement(readListaFornecedor);
-				// executar e obter o resultado
 				rs = pst.executeQuery();
-
 				if (rs.next()) {
-					// Esconder a lista
 					scrollPane.setVisible(false);
-					// Setar os campos
 					txtFornecedor.setText(rs.getString(2));
 					txtIDFornecedor.setText(rs.getString(1));
-					// Validação (liberação dos botões)
 					listaFornecedor.setEnabled(false);
 
 				} else {
 					JOptionPane.showMessageDialog(null, "Fornecedor inexistente");
 				}
-				// Fechar a conexão
 				con.close();
 			} catch (Exception e) {
 				System.out.println(e);
 			}
 		} else {
-			// Se não existir no banco um usuário da lista
 			scrollPane.setVisible(false);
 		}
 
-	} // Fim método buscar Usuário AVANÇADO (Busca Google)
+	}
 
 	/**
 	 * Método para buscar um contato pelo nome
 	 */
-	private void buscar() {
-		
-		String numOS = JOptionPane.showInputDialog("ID do produto");
-		// dica - testar o evento primeiro
-		// System.out.println("teste do botão buscar");
-		// Criar uma variável com a query (instrução do banco)
-		String readCodigo = "select * from produtos where codigo = ?";
-		// tratamento de exceções
+	private void buscarID() {
+
+		String readCodigo = JOptionPane.showInputDialog("ID do Produto");
+
+		String read = "select * from produtos inner join fornecedores on produtos.idfornecedor = fornecedores.codefornecedor where codigo = ?";
 		try {
-			// abrir a conexão
 			con = dao.conectar();
-			// preparar a execução da query (instrução sql - CRUD Read)
-			// O parâmetro 1 substitui a ? pelo conteúdo da caixa de texto
-			pst = con.prepareStatement(readCodigo);
-			// Substituir a ?(Parâmetro) pelo número da OS
-			pst.setString(1, numOS);
-			// executar a query e buscar o resultado
+			pst = con.prepareStatement(read);
+			pst.setString(1, readCodigo);
 			rs = pst.executeQuery();
-			// uso da estrutura if else para verificar se existe o contato
-			// rs.next() -> se existir um contato no banco
 			if (rs.next()) {
 				txtID.setText(rs.getString(1));
 				txtBarCode.setText(rs.getString(2));
-				//area de texto deve ser utilizado getNString
 				txtDescricao.setText(rs.getNString(3));
 				txtProduto.setText(rs.getString(4));
 				txtLote.setText(rs.getString(5));
 				txtFabricante.setText(rs.getString(6));
-				//setar a data do JCalendar
-				//passo 1: receber a data do mysql
-				String setarDataent = rs.getString(7);
-				//System.out.println(setarDataent);//apoio a lógica
-				//passo 2: formatar a data para o JCalendar
-				Date dataEntrada = new SimpleDateFormat("yyyy-MM-dd").parse(setarDataent);
-				//passo 3: exibir o resultado no JCalendar
-				dateEnt.setDate(dataEntrada);
-				
-				//setar a data do JCalendar
-				//passo 1: receber a data do mysql
-				String setarDataval = rs.getString(8);
-				//System.out.println(setarDataent);//apoio a lógica
-				//passo 2: formatar a data para o JCalendar
-				Date dataValidade = new SimpleDateFormat("yyyy-MM-dd").parse(setarDataval);
-				//passo 3: exibir o resultado no JCalendar
-				dateVal.setDate(dataValidade);
+				dateEnt.setDate(rs.getDate(7));
+				dateVal.setDate(rs.getDate(8));
 				txtCusto.setText(rs.getString(9));
 				txtLucro.setText(rs.getString(10));
 				txtEstoque.setText(rs.getString(12));
 				txtEstoqueMin.setText(rs.getString(13));
 				cboUNID.setSelectedItem(rs.getString(14));
 				txtLocalArmazenamento.setText(rs.getString(15));
-				txtFornecedor.setText(rs.getString(16));
+				txtIDFornecedor.setText(rs.getString(16));
+				txtFornecedor.setText(rs.getString(19));
 				Blob blob = (Blob) rs.getBlob(11);
 				byte[] img = blob.getBytes(1, (int) blob.length());
 				BufferedImage imagem = null;
@@ -916,67 +858,47 @@ public class Produtos extends JDialog {
 				Icon foto = new ImageIcon(icone.getImage().getScaledInstance(lblFoto.getWidth(), lblFoto.getHeight(),
 						Image.SCALE_SMOOTH));
 				lblFoto.setIcon(foto);
-				// Validação (liberação dos botões)
 				btnEditar.setEnabled(true);
 				btnExcluir.setEnabled(true);
 				listaFornecedor.setEnabled(true);
 				btnAdicionar.setEnabled(false);
 
 			} else {
-				// se não existir um contato no banco
-				JOptionPane.showMessageDialog(null, "ID do produto não encontrado");
-				// Validação (liberação do botão adicionar)
+				JOptionPane.showMessageDialog(null, "Código do produto não cadastrado");
 				btnAdicionar.setEnabled(true);
-				btnBuscar.setEnabled(true);
+				btnBuscarID.setEnabled(true);
 				btnExcluir.setEnabled(false);
 				btnEditar.setEnabled(false);
 			}
-			// fechar conexão (IMPORTANTE)
 			con.close();
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-	}// FIM DO METODO BUSCAR
+	}
 
-	private void buscarBarcode() {
-
-		// Captura do número da OS (sem usar a caixa de texto)
-		String numOS = JOptionPane.showInputDialog("ID do Produto");
-
-		// dica - testar o evento primeiro
-		// System.out.println("teste do botão buscar");
-		// Criar uma variável com a query (instrução do banco)
-		String read = "select * from produtos where barcode = ?";
-		// tratamento de exceções
+	private void buscarBarCode() {
+		String read = "select * from produtos inner join fornecedores on produtos.idfornecedor = fornecedores.codefornecedor where barcode = ?";
 		try {
-			// abrir a conexão
 			con = dao.conectar();
-			// preparar a execução da query (instrução sql - CRUD Read)
-			// O parâmetro 1 substitui a ? pelo conteúdo da caixa de texto
 			pst = con.prepareStatement(read);
-			// Substituir a ?(Parâmetro) pelo número da OS
-			pst.setString(1, numOS);
-			// executar a query e buscar o resultado
+			pst.setString(1, txtBarCode.getText());
 			rs = pst.executeQuery();
-			// uso da estrutura if else para verificar se existe o contato
-			// rs.next() -> se existir um contato no banco
 			if (rs.next()) {
 				txtID.setText(rs.getString(1));
-				txtBarCode.setText(rs.getString(2));
-				txtDescricao.setText(rs.getString(3));
+				txtDescricao.setText(rs.getNString(3));
 				txtProduto.setText(rs.getString(4));
 				txtLote.setText(rs.getString(5));
 				txtFabricante.setText(rs.getString(6));
-				// dataEnt.setText(rs.getString(7));
-				// dataVal.setText(rs.getString(8));
+				dateEnt.setDate(rs.getDate(7));
+				dateVal.setDate(rs.getDate(8));
 				txtCusto.setText(rs.getString(9));
 				txtLucro.setText(rs.getString(10));
 				txtEstoque.setText(rs.getString(12));
 				txtEstoqueMin.setText(rs.getString(13));
-
 				cboUNID.setSelectedItem(rs.getString(14));
 				txtLocalArmazenamento.setText(rs.getString(15));
-				txtFornecedor.setText(rs.getString(16));
+				txtIDFornecedor.setText(rs.getString(16));
+				txtFornecedor.setText(rs.getString(19));
 				Blob blob = (Blob) rs.getBlob(11);
 				byte[] img = blob.getBytes(1, (int) blob.length());
 				BufferedImage imagem = null;
@@ -989,68 +911,94 @@ public class Produtos extends JDialog {
 				Icon foto = new ImageIcon(icone.getImage().getScaledInstance(lblFoto.getWidth(), lblFoto.getHeight(),
 						Image.SCALE_SMOOTH));
 				lblFoto.setIcon(foto);
-				// Validação (liberação dos botões)
 				btnEditar.setEnabled(true);
 				btnExcluir.setEnabled(true);
 				listaFornecedor.setEnabled(true);
 				btnAdicionar.setEnabled(false);
 
 			} else {
-				// se não existir um contato no banco
-				JOptionPane.showMessageDialog(null, "ID do produto inexistente");
-				// Validação (liberação do botão adicionar)
+				JOptionPane.showMessageDialog(null, "BarCode do produto não encontrado");
 				btnAdicionar.setEnabled(true);
-				btnBuscar.setEnabled(true);
+				btnBuscarID.setEnabled(true);
 				btnExcluir.setEnabled(false);
 				btnEditar.setEnabled(false);
 			}
-			// fechar conexão (IMPORTANTE)
 			con.close();
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-	}// fim do metodo buscar barcode
-
+	}
 	
-	//metodo para buscar produto
-	private void buscarProduto() {
+	private void editarProdutoComFoto() {
+		if (txtBarCode.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "Preencha o Barcode do produto");
+			txtBarCode.requestFocus();
+		} else if (txtFornecedor.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "Preencha o fornecedor do produto");
+			txtFornecedor.requestFocus();
+		} else if (txtDescricao.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "Preencha a descrição do produto");
+			txtDescricao.requestFocus();
+		} else if (txtEstoqueMin.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "Preencha o estoque mínimo do produto");
+			txtEstoqueMin.requestFocus();
+		} else if (txtLocalArmazenamento.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "Preencha o local de armazenamento do produto");
+			txtLocalArmazenamento.requestFocus();
+		} else {
+			String update2 = "update produtos set descricao=?,produto=?,lote=?,foto=?,fabricante=?,custo=?,lucro=?,estoque=?,estoquemin=?,unidademedida=?,localarmazenagem=?,idfornecedor=? where codigo =?";
+			try {
+				con = dao.conectar();
+				pst = con.prepareStatement(update2);
+				pst.setString(1, txtDescricao.getText());
+				pst.setString(2, txtProduto.getText());
+				pst.setString(3, txtLote.getText());
+				pst.setBlob(4, fis, tamanho);
+				pst.setString(5, txtFabricante.getText());
+				pst.setString(6, txtCusto.getText());
+				pst.setString(7, txtLucro.getText());
+				pst.setString(8, txtEstoque.getText());
+				pst.setString(9, txtEstoqueMin.getText());
+				pst.setString(10, cboUNID.getSelectedItem().toString());
+				pst.setString(11, txtLocalArmazenamento.getText());
+				pst.setString(12, txtIDFornecedor.getText());
+				pst.setString(13, txtID.getText());
+				pst.executeUpdate();
+				JOptionPane.showMessageDialog(null, "Dados do produto editado com sucesso.");
+				limparCampos();
+				con.close();
+			} catch (Exception e) {
+				System.out.println(e);
+			}
 
-		// Captura do número da OS (sem usar a caixa de texto)
-		String numOS = JOptionPane.showInputDialog("Nome do Produto");
+		}
 
-		// dica - testar o evento primeiro
-		// System.out.println("teste do botão buscar");
-		// Criar uma variável com a query (instrução do banco)
-		String read = "select * from produtos where produto = ?";
-		// tratamento de exceções
+	}
+	
+	private void buscarNomeProduto() {
+
+		String read = "select * from produtos inner join fornecedores on produtos.idfornecedor = fornecedores.codefornecedor where produto = ?";
 		try {
-			// abrir a conexão
 			con = dao.conectar();
-			// preparar a execução da query (instrução sql - CRUD Read)
-			// O parâmetro 1 substitui a ? pelo conteúdo da caixa de texto
 			pst = con.prepareStatement(read);
-			// Substituir a ?(Parâmetro) pelo número da OS
-			pst.setString(1, numOS);
-			// executar a query e buscar o resultado
+			pst.setString(1, txtProduto.getText());
 			rs = pst.executeQuery();
-			// uso da estrutura if else para verificar se existe o contato
-			// rs.next() -> se existir um contato no banco
 			if (rs.next()) {
 				txtID.setText(rs.getString(1));
 				txtBarCode.setText(rs.getString(2));
-				txtDescricao.setText(rs.getString(3));
-				txtProduto.setText(rs.getString(4));
+				txtDescricao.setText(rs.getNString(3));
 				txtLote.setText(rs.getString(5));
 				txtFabricante.setText(rs.getString(6));
-				// dataEnt.setText(rs.getString(7));
-				// dataVal.setText(rs.getString(8));
+				dateEnt.setDate(rs.getDate(7));
+				dateVal.setDate(rs.getDate(8));
 				txtCusto.setText(rs.getString(9));
 				txtLucro.setText(rs.getString(10));
 				txtEstoque.setText(rs.getString(12));
 				txtEstoqueMin.setText(rs.getString(13));
 				cboUNID.setSelectedItem(rs.getString(14));
 				txtLocalArmazenamento.setText(rs.getString(15));
-				txtFornecedor.setText(rs.getString(16));
+				txtIDFornecedor.setText(rs.getString(16));
+				txtFornecedor.setText(rs.getString(19));
 				Blob blob = (Blob) rs.getBlob(11);
 				byte[] img = blob.getBytes(1, (int) blob.length());
 				BufferedImage imagem = null;
@@ -1063,25 +1011,21 @@ public class Produtos extends JDialog {
 				Icon foto = new ImageIcon(icone.getImage().getScaledInstance(lblFoto.getWidth(), lblFoto.getHeight(),
 						Image.SCALE_SMOOTH));
 				lblFoto.setIcon(foto);
-				// Validação (liberação dos botões)
 				btnEditar.setEnabled(true);
 				btnExcluir.setEnabled(true);
 				listaFornecedor.setEnabled(true);
 				btnAdicionar.setEnabled(false);
 
 			} else {
-				// se não existir um contato no banco
-				JOptionPane.showMessageDialog(null, "Produto não encontrado");
-				// Validação (liberação do botão adicionar)
+				JOptionPane.showMessageDialog(null, "Nome do produto não encontrado");
 				btnAdicionar.setEnabled(true);
-				btnBuscar.setEnabled(true);
+				btnBuscarID.setEnabled(true);
 				btnExcluir.setEnabled(false);
 				btnEditar.setEnabled(false);
 			}
-			// fechar conexão (IMPORTANTE)
 			con.close();
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-	}// fim do metodo buscar produto
+	}
 }

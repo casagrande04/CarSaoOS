@@ -24,24 +24,25 @@ import javax.swing.ImageIcon;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.Font;
-import java.awt.SystemColor;
 import java.awt.Toolkit;
 import java.awt.Cursor;
+import javax.swing.border.LineBorder;
+import java.awt.SystemColor;
 
 public class Login extends JFrame {
 
-	// Objetos JDBC
+	// objetos JDBC
 	DAO dao = new DAO();
 	private Connection con;
 	private PreparedStatement pst;
 	private ResultSet rs;
 	// objeto tela principal
 	Principal principal = new Principal();
-	
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -3493449186404023102L;
 	private JPanel contentPane;
 	private JTextField txtLogin;
 	private JPasswordField txtSenha;
@@ -67,89 +68,94 @@ public class Login extends JFrame {
 	/**
 	 * Create the frame.
 	 */
+
 	public Login() {
+		setTitle("Login");
 		setResizable(false);
-		setIconImage(Toolkit.getDefaultToolkit().getImage(Login.class.getResource("/img/note.png")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Login.class.getResource("/img/car.png")));
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowActivated(WindowEvent e) {
 				status();
+
 				setarData();
 			}
 		});
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 397, 267);
+		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		
+
 		JLabel lblNewLabel = new JLabel("Login");
-		lblNewLabel.setBounds(20, 40, 46, 14);
+		lblNewLabel.setFont(new Font("Yu Gothic UI Semibold", Font.PLAIN, 14));
+		lblNewLabel.setBounds(10, 53, 46, 17);
 		contentPane.add(lblNewLabel);
-		
+
 		txtLogin = new JTextField();
-		txtLogin.setBounds(81, 37, 277, 20);
+		txtLogin.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtLogin.setBounds(100, 50, 242, 20);
 		contentPane.add(txtLogin);
 		txtLogin.setColumns(10);
-		
+
 		JLabel lblNewLabel_1 = new JLabel("Senha");
-		lblNewLabel_1.setBounds(20, 95, 49, 14);
+		lblNewLabel_1.setFont(new Font("Yu Gothic UI Semibold", Font.PLAIN, 14));
+		lblNewLabel_1.setBounds(10, 91, 46, 17);
 		contentPane.add(lblNewLabel_1);
-		
+
 		txtSenha = new JPasswordField();
-		txtSenha.setBounds(81, 92, 277, 20);
+		txtSenha.setBorder(new LineBorder(new Color(128, 0, 0), 3, true));
+		txtSenha.setBounds(100, 88, 242, 20);
 		contentPane.add(txtSenha);
-		
+
 		JButton btnAcessar = new JButton("Acessar");
+		btnAcessar.setBackground(SystemColor.activeCaptionBorder);
+		btnAcessar.setBorder(new LineBorder(new Color(128, 0, 0), 3));
 		btnAcessar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		btnAcessar.setContentAreaFilled(false);
 		btnAcessar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				logar();
 			}
 		});
-		btnAcessar.setBounds(269, 134, 89, 23);
+		btnAcessar.setBounds(253, 132, 89, 23);
 		contentPane.add(btnAcessar);
-		//substituir o click pela tecla <ENTER> em um botão
-				getRootPane().setDefaultButton(btnAcessar);
-				
-				JPanel panel = new JPanel();
-				panel.setBorder(null);
-				panel.setBackground(new Color(128, 0, 0));
-				panel.setBounds(0, 179, 381, 49);
-				contentPane.add(panel);
-				panel.setLayout(null);
-				
-				lblStatus = new JLabel("");
-				lblStatus.setIcon(new ImageIcon(Login.class.getResource("/img/dboff.png")));
-				lblStatus.setBounds(323, 0, 48, 48);
-				panel.add(lblStatus);
-				
-				lblData = new JLabel("New label");
-				lblData.setForeground(SystemColor.text);
-				lblData.setFont(new Font("Tahoma", Font.BOLD, 16));
-				lblData.setBounds(10, 11, 303, 27);
-				panel.add(lblData);
-	} // Fim do construtor
-	
+		getRootPane().setDefaultButton(btnAcessar);
+
+		JPanel panel = new JPanel();
+		panel.setBackground(new Color(128, 0, 0));
+		panel.setBounds(0, 204, 434, 67);
+		contentPane.add(panel);
+		panel.setLayout(null);
+
+		lblStatus = new JLabel("");
+		lblStatus.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD | Font.ITALIC, 11));
+		lblStatus.setIcon(new ImageIcon(Login.class.getResource("/img/dboff.png")));
+		lblStatus.setBounds(378, 1, 46, 56);
+		panel.add(lblStatus);
+
+		lblData = new JLabel("New label");
+		lblData.setForeground(Color.BLACK);
+		lblData.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblData.setBounds(10, 16, 358, 31);
+		panel.add(lblData);
+	}
+
 	/**
-	 *  Método para autenticar um usuário 
+	 * Método para autenticar um usuario
 	 */
 	private void logar() {
-		// Criar uma variável para capturar a senha
 		String capturaSenha = new String(txtSenha.getPassword());
-		
-		// Validação
+
 		if (txtLogin.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Preencha o login");
 			txtLogin.requestFocus();
-		} else if(capturaSenha.length() == 0) {
+		} else if (capturaSenha.length() == 0) {
 			JOptionPane.showMessageDialog(null, "Preencha a senha");
 			txtSenha.requestFocus();
 		} else {
-			//Lógica principal
+
 			String read = "select * from usuarios where login=? and senha=md5(?)";
 			try {
 				con = dao.conectar();
@@ -157,71 +163,63 @@ public class Login extends JFrame {
 				pst.setString(1, txtLogin.getText());
 				pst.setString(2, capturaSenha);
 				rs = pst.executeQuery();
-				if(rs.next()) {
-					//capturar o perfil do usuário
-					System.out.println(rs.getString(5));//apoio a lógica
-					//tratamento do perfil do usuário
+				if (rs.next()) {
+
+					System.out.println(rs.getString(5));
+
 					String perfil = rs.getString(5);
-					if(perfil.equals("admin")) {
-						// logar -> acessar a tela principal
+					if (perfil.equals("admin")) {
+
 						principal.setVisible(true);
-						// setar a label da tela principal com o nome do usuário
 						principal.lblUsuario.setText(rs.getString(2));
-						// habilitar os botões
-						principal.btnFornecedor.setEnabled(true);
+
 						principal.btnUsuarios.setEnabled(true);
-						// mudar a cor do rodapé
-						principal.panelRodape.setBackground(Color.BLUE);
-						// fechar a tela de login
+						principal.btnRelatorios.setEnabled(true);
+
+						principal.panelRodape.setBackground(Color.RED);
+
 						this.dispose();
 					} else {
-						// logar -> acessar a tela principal
+
 						principal.setVisible(true);
-						// setar a label da tela principal com o nome do usuário
 						principal.lblUsuario.setText(rs.getString(2));
-						// fechar a tela de login
 						this.dispose();
+
 					}
-					
-					
+
 				} else {
-					JOptionPane.showMessageDialog(null, "usuário e/ou senha inválido(s)");
+					JOptionPane.showMessageDialog(null, "Usuário e/ou senha inválido(s)");
 				}
 				con.close();
 			} catch (Exception e) {
 			}
 		}
 	}
-	/**
-	 * Método responsável por exibir o status da conexão
-	 */
-	private void status(){
+
+	private void status() {
 		try {
-			//abrir a conexão
+
 			con = dao.conectar();
-			if(con == null) {
-					System.out.println("Erro de conexão");
-					lblStatus.setIcon(new ImageIcon(Principal.class.getResource("/img/dboff.png")));
+			if (con == null) {
+
+				lblStatus.setIcon(new ImageIcon(Principal.class.getResource("/img/dboff.png")));
 			} else {
-				System.out.println("Banco conectado");
+
 				lblStatus.setIcon(new ImageIcon(Principal.class.getResource("/img/dbon.png")));
 			}
-			//NUNCA esquecer de fechar a conexão
+
 			con.close();
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-		
-	}//fim do método status()
-	/**
-	 * Método responsável por setar a data no rodapé
-	 */
+	}
+
 	private void setarData() {
-		// Criar objeto para trazer a data do sistema
+
 		Date data = new Date();
-		// Criar objeto para formatar a data
+
 		DateFormat formatador = DateFormat.getDateInstance(DateFormat.FULL);
-		// Alterar o texto da label pela data atual formatada
+
 		lblData.setText(formatador.format(data));
 	}
-}// Fim do código
+}
