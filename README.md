@@ -17,7 +17,7 @@ A seguir estão descritas as instruções para uma cópia do projeto desenvolvid
 É necessário ter instalado no computador:
 
 • Java JDK 8;
-• XAMPP;
+• XAMPP.
 # Instalação:
 • Inicie o XAMPP;
 • Dê Start no "Apache" e no "MySQL";
